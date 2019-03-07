@@ -6,27 +6,29 @@ from PIL import Image, ImageEnhance, ImageOps
 
 
 operations = {
-    'ShearX': lambda img, prob, magnitude: shear_x(img, prob, magnitude),
-    'ShearY': lambda img, prob, magnitude: shear_y(img, prob, magnitude),
-    'TranslateX': lambda img, prob, magnitude: translate_x(img, prob, magnitude),
-    'TranslateY': lambda img, prob, magnitude: translate_y(img, prob, magnitude),
-    'Rotate': lambda img, prob, magnitude: rotate(img, prob, magnitude),
-    'AutoContrast': lambda img, prob, magnitude: auto_contrast(img, prob, magnitude),
-    'Invert': lambda img, prob, magnitude: invert(img, prob, magnitude),
-    'Equalize': lambda img, prob, magnitude: equalize(img, prob, magnitude),
-    'Solarize': lambda img, prob, magnitude: solarize(img, prob, magnitude),
-    'Posterize': lambda img, prob, magnitude: posterize(img, prob, magnitude),
-    'Contrast': lambda img, prob, magnitude: contrast(img, prob, magnitude),
-    'Color': lambda img, prob, magnitude: color(img, prob, magnitude),
-    'Brightness': lambda img, prob, magnitude: brightness(img, prob, magnitude),
-    'Sharpness': lambda img, prob, magnitude: sharpness(img, prob, magnitude),
-    'Cutout': lambda img, prob, magnitude: cutout(img, prob, magnitude),
+    'ShearX': lambda img, magnitude: shear_x(img, magnitude),
+    'ShearY': lambda img, magnitude: shear_y(img, magnitude),
+    'TranslateX': lambda img, magnitude: translate_x(img, magnitude),
+    'TranslateY': lambda img, magnitude: translate_y(img, magnitude),
+    'Rotate': lambda img, magnitude: rotate(img, magnitude),
+    'AutoContrast': lambda img, magnitude: auto_contrast(img, magnitude),
+    'Invert': lambda img, magnitude: invert(img, magnitude),
+    'Equalize': lambda img, magnitude: equalize(img, magnitude),
+    'Solarize': lambda img, magnitude: solarize(img, magnitude),
+    'Posterize': lambda img, magnitude: posterize(img, magnitude),
+    'Contrast': lambda img, magnitude: contrast(img, magnitude),
+    'Color': lambda img, magnitude: color(img, magnitude),
+    'Brightness': lambda img, magnitude: brightness(img, magnitude),
+    'Sharpness': lambda img, magnitude: sharpness(img, magnitude),
+    'Cutout': lambda img, magnitude: cutout(img, magnitude),
 }
 
 
 def apply_policy(img, policy):
-    img = operations[policy[0]](img, policy[1], policy[2])
-    img = operations[policy[3]](img, policy[4], policy[5])
+    if random.random() < policy[1]:
+        img = operations[policy[0]](img, policy[2])
+    if random.random() < policy[4]:
+        img = operations[policy[3]](img, policy[5])
 
     return img
 
@@ -40,11 +42,10 @@ def transform_matrix_offset_center(matrix, x, y):
     return transform_matrix
 
 
-def shear_x(img, prob=1.0, magnitude=10):
-    if random.random() > prob:
-        return img
+def shear_x(img, magnitude):
+    magnitudes = np.linspace(-0.3, 0.3, 11)
 
-    transform_matrix = np.array([[1, magnitude/10*random.uniform(-0.3, 0.3), 0],
+    transform_matrix = np.array([[1, random.uniform(magnitudes[magnitude], magnitudes[magnitude+1]), 0],
                                  [0, 1, 0],
                                  [0, 0, 1]])
     transform_matrix = transform_matrix_offset_center(transform_matrix, img.shape[0], img.shape[1])
@@ -57,12 +58,11 @@ def shear_x(img, prob=1.0, magnitude=10):
     return img
 
 
-def shear_y(img, prob=1.0, magnitude=10):
-    if random.random() > prob:
-        return img
+def shear_y(img, magnitude):
+    magnitudes = np.linspace(-0.3, 0.3, 11)
 
     transform_matrix = np.array([[1, 0, 0],
-                                 [magnitude/10*random.uniform(-0.3, 0.3), 1, 0],
+                                 [random.uniform(magnitudes[magnitude], magnitudes[magnitude+1]), 1, 0],
                                  [0, 0, 1]])
     transform_matrix = transform_matrix_offset_center(transform_matrix, img.shape[0], img.shape[1])
     affine_matrix = transform_matrix[:2, :2]
@@ -74,12 +74,11 @@ def shear_y(img, prob=1.0, magnitude=10):
     return img
 
 
-def translate_x(img, prob=1.0, magnitude=10):
-    if random.random() > prob:
-        return img
+def translate_x(img, magnitude):
+    magnitudes = np.linspace(-150/331, 150/331, 11)
 
     transform_matrix = np.array([[1, 0, 0],
-                                 [0, 1, magnitude/10*img.shape[1]*random.uniform(-150/331, 150/331)],
+                                 [0, 1, img.shape[1]*random.uniform(magnitudes[magnitude], magnitudes[magnitude+1])],
                                  [0, 0, 1]])
     transform_matrix = transform_matrix_offset_center(transform_matrix, img.shape[0], img.shape[1])
     affine_matrix = transform_matrix[:2, :2]
@@ -91,11 +90,10 @@ def translate_x(img, prob=1.0, magnitude=10):
     return img
 
 
-def translate_y(img, prob=1.0, magnitude=10):
-    if random.random() > prob:
-        return img
+def translate_y(img, magnitude):
+    magnitudes = np.linspace(-150/331, 150/331, 11)
 
-    transform_matrix = np.array([[1, 0, magnitude/10*img.shape[1]*random.uniform(-150/331, 150/331)],
+    transform_matrix = np.array([[1, 0, img.shape[0]*random.uniform(magnitudes[magnitude], magnitudes[magnitude+1])],
                                  [0, 1, 0],
                                  [0, 0, 1]])
     transform_matrix = transform_matrix_offset_center(transform_matrix, img.shape[0], img.shape[1])
@@ -108,11 +106,10 @@ def translate_y(img, prob=1.0, magnitude=10):
     return img
 
 
-def rotate(img, prob=1.0, magnitude=10):
-    if random.random() > prob:
-        return img
+def rotate(img, magnitude):
+    magnitudes = np.linspace(-30, 30, 11)
 
-    theta = np.deg2rad(magnitude/10*random.uniform(-30, 30))
+    theta = np.deg2rad(random.uniform(magnitudes[magnitude], magnitudes[magnitude+1]))
     transform_matrix = np.array([[np.cos(theta), -np.sin(theta), 0],
                                  [np.sin(theta), np.cos(theta), 0],
                                  [0, 0, 1]])
@@ -126,99 +123,83 @@ def rotate(img, prob=1.0, magnitude=10):
     return img
 
 
-def auto_contrast(img, prob=1.0, magnitude=10):
-    if random.random() > prob:
-        return img
-
+def auto_contrast(img, magnitude):
     img = Image.fromarray(img)
     img = ImageOps.autocontrast(img)
     img = np.array(img)
     return img
 
 
-def invert(img, prob=1.0, magnitude=10):
-    if random.random() > prob:
-        return img
-
+def invert(img, magnitude):
     img = Image.fromarray(img)
     img = ImageOps.invert(img)
     img = np.array(img)
     return img
 
 
-def equalize(img, prob=1.0, magnitude=10):
-    if random.random() > prob:
-        return img
-
+def equalize(img, magnitude):
     img = Image.fromarray(img)
     img = ImageOps.equalize(img)
     img = np.array(img)
     return img
 
 
-def solarize(img, prob=1.0, magnitude=10):
-    if random.random() > prob:
-        return img
+def solarize(img, magnitude):
+    magnitudes = np.linspace(0, 256, 11)
 
     img = Image.fromarray(img)
-    img = ImageOps.solarize(img, magnitude/10*random.uniform(0, 256))
+    img = ImageOps.solarize(img, random.uniform(magnitudes[magnitude], magnitudes[magnitude+1]))
     img = np.array(img)
     return img
 
 
-def posterize(img, prob=1.0, magnitude=10):
-    if random.random() > prob:
-        return img
+def posterize(img, magnitude):
+    magnitudes = np.linspace(4, 8, 11)
 
     img = Image.fromarray(img)
-    img = ImageOps.posterize(img, round(magnitude/10*random.uniform(4, 8)))
+    img = ImageOps.posterize(img, int(round(random.uniform(magnitudes[magnitude], magnitudes[magnitude+1]))))
     img = np.array(img)
     return img
 
 
-def contrast(img, prob=1.0, magnitude=10):
-    if random.random() > prob:
-        return img
+def contrast(img, magnitude):
+    magnitudes = np.linspace(0.1, 1.9, 11)
 
     img = Image.fromarray(img)
-    img = ImageEnhance.Contrast(img).enhance(magnitude/10*random.uniform(0.1, 1.9))
+    img = ImageEnhance.Contrast(img).enhance(random.uniform(magnitudes[magnitude], magnitudes[magnitude+1]))
     img = np.array(img)
     return img
 
 
-def color(img, prob=1.0, magnitude=10):
-    if random.random() > prob:
-        return img
+def color(img, magnitude):
+    magnitudes = np.linspace(0.1, 1.9, 11)
 
     img = Image.fromarray(img)
-    img = ImageEnhance.Color(img).enhance(magnitude/10*random.uniform(0.1, 1.9))
+    img = ImageEnhance.Color(img).enhance(random.uniform(magnitudes[magnitude], magnitudes[magnitude+1]))
     img = np.array(img)
     return img
 
 
-def brightness(img, prob=1.0, magnitude=10):
-    if random.random() > prob:
-        return img
+def brightness(img, magnitude):
+    magnitudes = np.linspace(0.1, 1.9, 11)
 
     img = Image.fromarray(img)
-    img = ImageEnhance.Brightness(img).enhance(magnitude/10*random.uniform(0.1, 1.9))
+    img = ImageEnhance.Brightness(img).enhance(random.uniform(magnitudes[magnitude], magnitudes[magnitude+1]))
     img = np.array(img)
     return img
 
 
-def sharpness(img, prob=1.0, magnitude=10):
-    if random.random() > prob:
-        return img
+def sharpness(img, magnitude):
+    magnitudes = np.linspace(0.1, 1.9, 11)
 
     img = Image.fromarray(img)
-    img = ImageEnhance.Sharpness(img).enhance(magnitude/10*random.uniform(0.1, 1.9))
+    img = ImageEnhance.Sharpness(img).enhance(random.uniform(magnitudes[magnitude], magnitudes[magnitude+1]))
     img = np.array(img)
     return img
 
 
-def cutout(org_img, prob=1.0, magnitude=None):
-    if random.random() > prob:
-        return img
+def cutout(org_img, magnitude=None):
+    magnitudes = np.linspace(0, 60/331, 11)
 
     img = np.copy(org_img)
     mask_val = img.mean()
@@ -226,7 +207,7 @@ def cutout(org_img, prob=1.0, magnitude=None):
     if magnitude is None:
         mask_size = 16
     else:
-        mask_size = int(round(magnitude/10*img.shape[0]*random.uniform(0, 60/331)))
+        mask_size = int(round(img.shape[0]*random.uniform(magnitudes[magnitude], magnitudes[magnitude+1])))
     top = np.random.randint(0 - mask_size//2, img.shape[0] - mask_size)
     left = np.random.randint(0 - mask_size//2, img.shape[1] - mask_size)
     bottom = top + mask_size
@@ -251,7 +232,7 @@ def main():
     img = x_train[0]
     for key, op in zip(operations.keys(), operations.values()):
         print(key)
-        dst = op(img, 1.0, 10)
+        dst = op(img, random.randint(0, 9))
         plt.imshow(dst)
         plt.axis('off')
         plt.show()
