@@ -11,10 +11,10 @@ Learning Augmentation Policies from Data](https://arxiv.org/abs/1805.09501) impl
 ## Usage
 
 ## Training
-### Cifar10
+### CIFAR-10
 
 ## Results
-### Cifar10
+### CIFAR-10
 | Model                   |   Accuracy (%)    |   Loss   |
 |:------------------------|:-----------------:|:--------:|
 |                         |                   |          |
