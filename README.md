@@ -22,4 +22,4 @@ python train.py --cutout True --auto-augment True
 | Model                              |   Accuracy (%)    |   Loss   |
 |:-----------------------------------|:-----------------:|:--------:|
 |WideResNet28-10 baseline            |              95.32|    0.3717|
-|WideResNet28-10 +Cutout, AutoAugment|              96.06|    0.3565|
+|WideResNet28-10 +Cutout, AutoAugment|          **96.06**|**0.3565**|
