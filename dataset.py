@@ -5,9 +5,12 @@ from auto_augment import cutout, apply_policy
 from utils import *
 
 
-class Cifar10ImageDataGenerator(ImageDataGenerator):
+class Cifar10ImageDataGenerator:
     def __init__(self, args):
-        super().__init__(width_shift_range=0.1, height_shift_range=0.1, fill_mode='constant', cval=0, horizontal_flip=True)
+        self.datagen = ImageDataGenerator(width_shift_range=0.1, height_shift_range=0.1, fill_mode='constant', cval=0, horizontal_flip=True)
+
+        self.means = np.array([0.4914009 , 0.48215896, 0.4465308])
+        self.stds = np.array([0.24703279, 0.24348423, 0.26158753])
 
         self.args = args
         if args.auto_augment:
@@ -39,20 +42,20 @@ class Cifar10ImageDataGenerator(ImageDataGenerator):
                 ['TranslateY', 0.7, 9, 'AutoContrast', 0.9, 1],
             ]
 
-    def standardize(x):
-        means = (0.4914009 , 0.48215896, 0.4465308)
-        stds = (0.24703279, 0.24348423, 0.26158753)
-
+    def standardize(self, x):
         x = x.astype('float32') / 255
 
-        for c in range(x.shape[3]):
-            x[:, :, :, c] = (x[:, :, :, c] - means[c]) / stds[c]
+        means = self.means.reshape(1, 1, 1, 3)
+        stds = self.stds.reshape(1, 1, 1, 3)
+
+        x -= means
+        x /= (stds + 1e-6)
 
         return x
 
     def flow(self, x, y=None, batch_size=32, shuffle=True, sample_weight=None,
              seed=None, save_to_dir=None, save_prefix='', save_format='png', subset=None):
-        batches = super().flow(x, y, batch_size, shuffle, sample_weight,
+        batches = self.datagen.flow(x, y, batch_size, shuffle, sample_weight,
                                seed, save_to_dir, save_prefix, save_format, subset)
 
         while True:
@@ -67,7 +70,7 @@ class Cifar10ImageDataGenerator(ImageDataGenerator):
                 for i in range(x_batch.shape[0]):
                     x_batch[i] = apply_policy(x_batch[i], self.policies[random.randrange(len(self.policies))])
 
-            x_batch = standardize(x_batch)
+            x_batch = self.standardize(x_batch)
 
             yield x_batch, y_batch
 
@@ -79,7 +82,7 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--cutout', default=True, type=str2bool)
-    parser.add_argument('--auto-augment', default=False, type=str2bool)
+    parser.add_argument('--auto-augment', default=True, type=str2bool)
     args = parser.parse_args()
 
     datagen = Cifar10ImageDataGenerator(args)
